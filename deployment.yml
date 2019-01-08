@@ -1,0 +1,67 @@
+---
+kind: Deployment
+apiVersion: apps/v1beta2
+metadata:
+  name: gcld-cloudwatch-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gcld-cloudwatch-exporter
+  template:
+    metadata:
+      labels:
+        app: gcld-cloudwatch-exporter
+    spec:
+      containers:
+      - name: g-cld
+        image: govau/cloudwatch_exporter
+        env:
+        - name: AWS_PROFILE
+          value: g-cld
+        - name: AWS_SDK_LOAD_CONFIG
+          value: t
+        ports:
+        - containerPort: 9042
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /etc/cloudwatch_exporter
+          name: config-volume
+        - mountPath: /root/.aws
+          name: aws-secrets-volume
+      volumes:
+      - name: config-volume
+        configMap:
+          name: cloudwatch-exporter-config
+      - name: aws-secrets-volume
+        secret:
+          secretName: cloudwatch-exporter-aws
+---
+# kind: Service
+# apiVersion: v1
+# metadata:
+#   name: cloudwatch-exporter
+# spec:
+#   ports:
+#     - port: 9042
+#       targetPort: 9042
+#   selector:
+#     app: gcld-cloudwatch-exporter
+  # type: LoadBalancer
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: cloudwatch-exporter-config
+data:
+  config.yml: |
+    tasks:
+      - name: rds
+        default_region: ap-southeast-2
+        metrics:
+        - aws_namespace: "AWS/RDS"
+          aws_dimensions: [DBInstanceIdentifier]
+          aws_metric_name: FreeStorageSpace
+          aws_statistics: [Average]
+          
+

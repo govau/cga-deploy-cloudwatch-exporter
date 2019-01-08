@@ -1,0 +1,15 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: golang
+    tag: "1.11"
+inputs:
+- name: src
+- name: deploy-src
+outputs: 
+- name: src
+run:
+  path: deploy-src/ci/build.sh
+  

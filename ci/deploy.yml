@@ -1,0 +1,25 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: govau/cga-cf-bosh-cli
+    tag: latest
+
+inputs:
+- name: src
+- name: deploy-src
+- name: ca
+- name: img
+
+outputs: []
+
+params:
+  ENV:
+  JUMPBOX_SSH_KEY:
+  JUMPBOX_SSH_PORT:
+  JUMPBOX_SSH_L_HOST:
+
+run:
+  path: deploy-src/ci/build.sh
