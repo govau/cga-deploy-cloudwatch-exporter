@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eu
+set -eux
 set -o pipefail
 
 ORIG_PWD="${PWD}"
@@ -24,3 +24,5 @@ go build
 
 cp -rf * $ORIG_PWD/output
 # mv ./cloudwatch_exporter ./config.yml Dockerfile $ORIG_PWD/output
+
+ls -l $ORIG_PWD/output
