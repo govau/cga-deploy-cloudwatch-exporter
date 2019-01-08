@@ -19,10 +19,13 @@ output="$(aws iam create-access-key --user-name cloudwatch-exporter-ecr-pusher)"
 aws_access_key_id="$(echo $output | jq -r .AccessKey.AccessKeyId)"
 aws_secret_access_key="$(echo $output | jq -r .AccessKey.SecretAccessKey)"
 unset AWS_PROFILE
+aws_repository="$(aws --profile l-cld ecr describe-repositories | jq -r '.repositories[] | select( .repositoryName == "cloudwatch-exporter") | .repositoryUri')"
 
 export https_proxy=socks5://localhost:8112
 credhub s -n /concourse/apps/cloudwatch-exporter/aws_access_key_id --type value --value "${aws_access_key_id}"
 credhub s -n /concourse/apps/cloudwatch-exporter/aws_secret_access_key --type value --value "${aws_secret_access_key}"
+credhub s -n /concourse/apps/cloudwatch-exporter/aws_repository --type value --value "${aws_repository}"
+
 unset https_proxy
 
 # set the k8s secrets used to access cloudwatch-exporter in each env

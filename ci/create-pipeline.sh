@@ -9,7 +9,7 @@ export https_proxy=socks5://localhost:8112
 
 fly validate-pipeline --config pipeline.yml
 
-fly -t ${TARGET} set-pipeline \
+fly -t ${TARGET} set-pipeline -n \
   --config pipeline.yml \
   --pipeline "${PIPELINE}"
 
