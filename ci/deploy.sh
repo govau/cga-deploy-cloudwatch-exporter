@@ -13,7 +13,7 @@ cat <<EOF > deployment.yaml
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: cloudwatch-exporter-config
+  name: ${ENV}cld-cloudwatch-exporter-config
 data:
   config.yml: |
     tasks:
@@ -48,13 +48,14 @@ spec:
         ports:
         - name: http
           containerPort: 9042
-        volumes:
-        - name: config-volume
-          configMap:
-            name: cloudwatch-exporter-config
         volumeMounts:
         - mountPath: /etc/cloudwatch_exporter
           name: config-volume
+      volumes:
+      - name: config-volume
+        configMap:
+          name: ${ENV}cld-cloudwatch-exporter-config
+      
 EOF
 
 cat deployment.yaml
