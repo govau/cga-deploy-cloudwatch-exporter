@@ -12,7 +12,7 @@ jobs:
       file: deploy-src/ci/build.yml
     - put: img
       params:
-        build: src
+        build: output
         tag_file: src/.git/ref
       get_params: {skip_download: true}
     on_success:

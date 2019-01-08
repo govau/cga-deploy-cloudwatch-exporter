@@ -9,7 +9,7 @@ inputs:
 - name: src
 - name: deploy-src
 outputs: 
-- name: src
+- name: output
 run:
   path: deploy-src/ci/build.sh
   

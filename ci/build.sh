@@ -14,3 +14,5 @@ ln -s "${ORIG_PWD}/src" "${GOPATH}/src/github.com/technofy/cloudwatch_exporter"
 cd "${GOPATH}/src/github.com/technofy/cloudwatch_exporter"
 
 go build
+
+mv ./cloudwatch_exporter ./config.yml Dockerfile $ORIG_PWD/output
