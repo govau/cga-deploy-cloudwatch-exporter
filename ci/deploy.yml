@@ -22,4 +22,4 @@ params:
   JUMPBOX_SSH_L_HOST:
 
 run:
-  path: deploy-src/ci/build.sh
+  path: deploy-src/ci/deploy.sh
