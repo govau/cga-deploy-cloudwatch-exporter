@@ -13,6 +13,10 @@ mkdir -p "${GOPATH}/src/github.com/technofy"
 ln -s "${ORIG_PWD}/src" "${GOPATH}/src/github.com/technofy/cloudwatch_exporter"
 cd "${GOPATH}/src/github.com/technofy/cloudwatch_exporter"
 
+go get github.com/golang/dep/cmd/dep
+
+go dep ensure
+
 go build
 
 mv ./cloudwatch_exporter ./config.yml Dockerfile $ORIG_PWD/output
