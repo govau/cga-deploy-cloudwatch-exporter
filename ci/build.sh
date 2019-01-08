@@ -22,4 +22,5 @@ dep ensure
 
 go build
 
-mv ./cloudwatch_exporter ./config.yml Dockerfile $ORIG_PWD/output
+cp -rf * $ORIG_PWD/output
+# mv ./cloudwatch_exporter ./config.yml Dockerfile $ORIG_PWD/output
