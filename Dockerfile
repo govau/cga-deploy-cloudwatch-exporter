@@ -13,12 +13,12 @@ RUN cd /go/src/github.com/technofy/cloudwatch_exporter && \
     dep ensure && \
     CGO_ENABLED=0 go install github.com/technofy/cloudwatch_exporter
 
-# FROM scratch
-FROM alpine:latest
-RUN apk update && \
-    apk add ca-certificates && \
-    update-ca-certificates
-# COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+FROM scratch
+# FROM alpine:latest
+# RUN apk update && \
+#     apk add ca-certificates && \
+#     update-ca-certificates
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
 COPY --from=builder /go/bin/cloudwatch_exporter /bin/cloudwatch_exporter
 COPY --from=builder /go/src/github.com/technofy/cloudwatch_exporter/config.yml /etc/cloudwatch_exporter/config.yml
