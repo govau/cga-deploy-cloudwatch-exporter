@@ -39,7 +39,8 @@ jobs:
   plan:
   - do:
     - get: src
-      trigger: true
+      version:
+        ref: 9dc6131338e3b675016e79f81f02eeb5a1e8e559
     - get: deploy-src
       trigger: true
     - task: prep-for-build
