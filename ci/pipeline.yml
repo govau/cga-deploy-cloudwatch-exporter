@@ -8,33 +8,52 @@ jobs:
       trigger: true
     - get: deploy-src
       trigger: true
-    - task: build
-      file: deploy-src/ci/build.yml
+    - task: prep-for-build
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source: 
+            repository: alpine
+            tag: 3.8
+        inputs:
+          - name: src
+          - name: deploy-src
+        outputs:
+          - name: build
+        run:
+          path: sh
+          args:
+            - -c
+            - |
+              cp -rf src/* build
+              cp deploy-src/Dockerfile build
     - put: img
       params:
-        build: output
+        build: build
         tag_file: src/.git/ref
+        tag_as_latest: true
       get_params: {skip_download: true}
-    on_success:
-      put: slack
-      params:
-        text: |
-          :white_check_mark: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME SUCCESS
-          <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+    # on_success:
+    #   put: slack
+    #   params:
+    #     text: |
+    #       :white_check_mark: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME SUCCESS
+    #       <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
     on_failure:
       put: slack
       params:
         text: |
           :x: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME FAILED
           <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-- name: cloudwatch-exporter-deploy-d
+- name: deploy-d
   serial: true
   plan:
   - do:
     - get: src
       passed: [build-container-image]
     - get: deploy-src
-      trigger: true
+      passed: [build-container-image]
     - get: img
       passed: [build-container-image]
       params: {skip_download: true}
