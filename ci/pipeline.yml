@@ -34,7 +34,7 @@ resource_types:
   source:
     repository: cfcommunity/slack-notification-resource
 jobs:
-- name: build-container-image
+- name: build-image
   serial: true
   plan:
   - do:
@@ -81,13 +81,13 @@ jobs:
   - do:
     - get: src
       passed:
-      - build-container-image
+      - build-image
     - get: deploy-src
       passed:
-      - build-container-image
+      - build-image
     - get: img
       passed:
-      - build-container-image
+      - build-image
       trigger: true
       params:
         skip_download: true
