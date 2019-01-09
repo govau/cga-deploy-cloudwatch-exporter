@@ -20,7 +20,10 @@ chmod a+x /usr/local/bin/dep
 
 dep ensure
 
-go build
+CGO_ENABLED=0 \
+GOOS=linux \
+GOARCH=amd64 \
+go build .
 
 cp -rf * $ORIG_PWD/output
 # mv ./cloudwatch_exporter ./config.yml Dockerfile $ORIG_PWD/output
