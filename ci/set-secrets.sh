@@ -38,9 +38,10 @@ for ENV_NAME in g d y b; do
     output="$(aws iam create-access-key --user-name "${iam_user}")"
     aws_access_key_id="$(echo $output | jq -r .AccessKey.AccessKeyId)"
     aws_secret_access_key="$(echo $output | jq -r .AccessKey.SecretAccessKey)"
+
     unset AWS_PROFILE
 
-    kubectl create secret generic ${ENV_NAME}cld-cloudwatch-exporter \
+    kubectl -n cloudwatch-exporter create secret generic ${ENV_NAME}cld-cloudwatch-exporter \
         --from-literal "AWS_ACCESS_KEY_ID=${aws_access_key_id}" \
         --from-literal "AWS_SECRET_ACCESS_KEY=${aws_secret_access_key}" \
         --dry-run -o yaml | kubectl apply -f -
