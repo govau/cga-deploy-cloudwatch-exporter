@@ -3,6 +3,8 @@
 set -eu
 set -o pipefail
 
+: "${ENV:?Need to set ENV e.g. d}"
+
 # Tag is not always populated correctly by the docker-image resource (ie it defaults to latest)
 # so use the actual source for tag
 TAG=$(cat src/.git/ref)
