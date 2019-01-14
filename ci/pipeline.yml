@@ -115,7 +115,7 @@ jobs:
       - deploy-d
       params:
         skip_download: true
-- name: deploy-yb
+- name: deploy-y
   serial: true
   plan:
   - do:
@@ -134,7 +134,7 @@ jobs:
     - task: deploy-y
       file: deploy-src/ci/deploy.yml
       params:
-        ENV: y
+        ENV: "y"
         KUBECONFIG: ((kubeconfig))
     - task: deploy-b
       file: deploy-src/ci/deploy.yml
@@ -153,4 +153,38 @@ jobs:
         text: |
           :white_check_mark: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME SUCCESS
           <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+- name: deploy-b
+  serial: true
+  plan:
+  - do:
+    - get: src
+      passed:
+      - ship-it
+    - get: deploy-src
+      passed:
+      - ship-it
+    - get: img
+      passed:
+      - ship-it
+      trigger: true
+      params:
+        skip_download: true
+    - task: deploy-b
+      file: deploy-src/ci/deploy.yml
+      params:
+        ENV: b
+        KUBECONFIG: ((kubeconfig))
+    on_failure:
+      put: slack
+      params:
+        text: |
+          :x: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME FAILED
+          <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+    on_success:
+      put: slack
+      params:
+        text: |
+          :white_check_mark: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME SUCCESS
+          <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+
 
