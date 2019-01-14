@@ -45,7 +45,6 @@ for ENV_NAME in g d y b; do
         --from-literal "AWS_SECRET_ACCESS_KEY=${aws_secret_access_key}" \
         --dry-run -o yaml | kubectl apply -f -
 
-    unset AWS_PROFILE
 done
 
 
