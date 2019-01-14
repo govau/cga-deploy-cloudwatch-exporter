@@ -9,7 +9,6 @@ TAG=$(cat src/.git/ref)
 REPO=$(cat img/repository)
 
 cat <<EOF > deployment.yaml
----
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -55,16 +54,25 @@ spec:
       - name: config-volume
         configMap:
           name: ${ENV}cld-cloudwatch-exporter-config
-      
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: ${ENV}cld-cloudwatch-exporter
+  labels:
+    monitor: me
+spec:
+  selector:
+    app: ${ENV}cld-cloudwatch-exporter
+  ports:
+  - name: web
+    port: 9042  
 EOF
 
 cat deployment.yaml
 
-mkdir -p $HOME/.ssh
-cat <<EOF >> $HOME/.ssh/known_hosts
-@cert-authority *.cld.gov.au $(cat ca/terraform/sshca-ca.pub)
-EOF
-echo "${JUMPBOX_SSH_KEY}" > $HOME/.ssh/key.pem
-chmod 600 $HOME/.ssh/key.pem
-ssh -i $HOME/.ssh/key.pem -p "${JUMPBOX_SSH_PORT}" ec2-user@${JUMPBOX_SSH_L_HOST} kubectl apply --record -f - < deployment.yaml
-ssh -i $HOME/.ssh/key.pem -p "${JUMPBOX_SSH_PORT}" ec2-user@${JUMPBOX_SSH_L_HOST} kubectl rollout status deployment.apps/${ENV}cld-cloudwatch-exporter
+echo $KUBECONFIG > k
+export KUBECONFIG=k
+
+kubectl apply --record -f - < deployment.yaml
+kubectl rollout status deployment.apps/${ENV}cld-cloudwatch-exporter
