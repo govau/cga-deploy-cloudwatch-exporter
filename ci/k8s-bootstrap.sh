@@ -50,6 +50,12 @@ spec:
       monitor: me
   endpoints:
   - port: web
+    path: /metrics
+  - port: web
+    path: /scrape
+    params:
+      task:
+      - rds
 EOF
 )
 
