@@ -31,33 +31,11 @@ jobs:
   plan:
   - do:
     - get: src
-      version:
-        ref: 9dc6131338e3b675016e79f81f02eeb5a1e8e559
     - get: deploy-src
       trigger: true
-    - task: prep-for-build
-      config:
-        platform: linux
-        image_resource:
-          type: docker-image
-          source:
-            repository: alpine
-            tag: 3.8
-        run:
-          path: sh
-          args:
-          - -c
-          - |
-            cp -rf src/* build
-            cp deploy-src/Dockerfile build
-        inputs:
-        - name: src
-        - name: deploy-src
-        outputs:
-        - name: build
     - put: img
       params:
-        build: build
+        build: src
         tag_as_latest: true
         tag_file: src/.git/ref
       get_params:
