@@ -26,6 +26,16 @@ resource_types:
   source:
     repository: cfcommunity/slack-notification-resource
 jobs:
+- name: deploy-common
+  serial: true
+  plan:
+  - do:
+    - get: deploy-src
+      trigger: true
+    - task: deploy
+      file: deploy-src/ci/deploy-common.yml
+      params:
+        KUBECONFIG: ((kubeconfig))
 - name: build-image
   serial: true
   plan:

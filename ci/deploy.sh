@@ -11,37 +11,22 @@ TAG=$(cat src/.git/ref)
 REPO=$(cat img/repository)
 
 cat <<EOF > deployment.yaml
-kind: ConfigMap
-apiVersion: v1
-metadata:
-  name: ${ENV}cld-cloudwatch-exporter-config
-data:
-  config.yml: |
-    tasks:
-      - name: rds
-        default_region: ap-southeast-2
-        metrics:
-        - aws_namespace: "AWS/RDS"
-          aws_dimensions: [DBInstanceIdentifier]
-          aws_metric_name: FreeStorageSpace
-          aws_statistics: [Average]
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ${ENV}cld-cloudwatch-exporter
+  name: dcld-cloudwatch-exporter
 spec:
   selector:
     matchLabels:
-      app: ${ENV}cld-cloudwatch-exporter
+      app: dcld-cloudwatch-exporter
   replicas: 1
   template:
     metadata:
       labels:
-        app: ${ENV}cld-cloudwatch-exporter
+        app: dcld-cloudwatch-exporter
     spec:
       containers:
-      - name: ${ENV}cld-cloudwatch-exporter
+      - name: dcld-cloudwatch-exporter
         image: ${REPO}:${TAG}
         resources: {limits: {memory: "64Mi", cpu: "100m"}}
         envFrom:
@@ -55,7 +40,7 @@ spec:
       volumes:
       - name: config-volume
         configMap:
-          name: ${ENV}cld-cloudwatch-exporter-config
+          name: cloudwatch-exporter-config
 ---
 kind: Service
 apiVersion: v1
@@ -68,7 +53,7 @@ spec:
     app: ${ENV}cld-cloudwatch-exporter
   ports:
   - name: web
-    port: 9042  
+    port: 9042
 EOF
 
 cat deployment.yaml
