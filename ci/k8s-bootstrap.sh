@@ -37,51 +37,6 @@ subjects:
   namespace: "${NAMESPACE}"
   kind: ServiceAccount
 ---
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: "${NAMESPACE}"
-  namespace: "${NAMESPACE}"
-  labels:
-    release: prometheus-operator
-spec:
-  selector:
-    matchLabels:
-      monitor: me
-  endpoints:
-  - port: web
-    path: /metrics
-  - port: web
-    path: /scrape
-    params:
-      task:
-      - rds
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRole
-metadata:
-  name: prometheusrules-creator
-rules:
-- apiGroups:
-  - monitoring.coreos.com
-  resources:
-  - prometheusrules
-  verbs:
-  - 'get'
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  name: prometheusrules
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: prometheusrules-creator
-subjects:
-- name: "${ci_user}"
-  namespace: "${NAMESPACE}"
-  kind: ServiceAccount
-
 EOF
 )
 

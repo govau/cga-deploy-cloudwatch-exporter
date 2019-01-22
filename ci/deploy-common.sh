@@ -5,6 +5,25 @@ set -o pipefail
 
 
 cat <<EOF > deployment.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: "cloudwatch-exporter"
+  labels:
+    release: prometheus-operator
+spec:
+  selector:
+    matchLabels:
+      monitor: me
+  endpoints:
+  - port: web
+    path: /metrics
+  - port: web
+    path: /scrape
+    params:
+      task:
+      - rds
+---
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -35,7 +54,7 @@ spec:
     - alert: AwsCloudwatchExporterScrapeDurationHigh
       annotations:
         summary: Cloudwatch exporter scrape duration high
-        message: Cloudwatch exporter scrape took more than 5 seconds
+        message: Cloudwatch exporter scrape took more than 10 seconds
       expr: cloudwatch_exporter_scrape_duration_seconds > 10
       for: 5m
       labels:
