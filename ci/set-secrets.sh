@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Sets the secrets in concourse's credhub and k8s needed by this pipeline.
+# The credentials are rotated each time this script is run.
+
 set -euxo pipefail
 
 function trim_to_one_access_key(){
@@ -34,7 +37,7 @@ for ENV_NAME in g d y b; do
     export AWS_PROFILE=${ENV_NAME}-cld
 
     trim_to_one_access_key $iam_user
-    
+
     output="$(aws iam create-access-key --user-name "${iam_user}")"
     aws_access_key_id="$(echo $output | jq -r .AccessKey.AccessKeyId)"
     aws_secret_access_key="$(echo $output | jq -r .AccessKey.SecretAccessKey)"
