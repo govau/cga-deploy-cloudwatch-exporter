@@ -28,7 +28,10 @@ spec:
       containers:
       - name: dcld-cloudwatch-exporter
         image: ${REPO}:${TAG}
-        resources: {limits: {memory: "64Mi", cpu: "100m"}}
+        resources:
+          limits:
+            cpu: "200m"
+            memory: "64Mi"
         envFrom:
         - secretRef: {name: ${ENV}cld-cloudwatch-exporter}
         ports:
