@@ -14,19 +14,19 @@ cat <<EOF > deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: dcld-cloudwatch-exporter
+  name: ${ENV}cld-cloudwatch-exporter
 spec:
   selector:
     matchLabels:
-      app: dcld-cloudwatch-exporter
+      app: ${ENV}cld-cloudwatch-exporter
   replicas: 1
   template:
     metadata:
       labels:
-        app: dcld-cloudwatch-exporter
+        app: ${ENV}cld-cloudwatch-exporter
     spec:
       containers:
-      - name: dcld-cloudwatch-exporter
+      - name: ${ENV}cld-cloudwatch-exporter
         image: ${REPO}:${TAG}
         resources:
           limits:
