@@ -124,11 +124,6 @@ jobs:
       params:
         ENV: "y"
         KUBECONFIG: ((kubeconfig))
-    - task: deploy-b
-      file: deploy-src/ci/deploy.yml
-      params:
-        ENV: b
-        KUBECONFIG: ((kubeconfig))
     on_failure:
       put: slack
       params:
