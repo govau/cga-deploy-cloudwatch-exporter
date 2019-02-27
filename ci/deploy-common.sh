@@ -1,8 +1,8 @@
 #!/bin/bash
 
-set -eu
-set -o pipefail
+set -euo pipefail
 
+: "${KUBECONFIG_JSON:?Need to set KUBECONFIG_JSON}"
 
 cat <<EOF > deployment.yaml
 apiVersion: monitoring.coreos.com/v1
@@ -16,28 +16,8 @@ spec:
     matchLabels:
       monitor: me
   endpoints:
-  - port: web
+  - port: http
     path: /metrics
-  - port: web
-    path: /scrape
-    params:
-      task:
-      - rds
----
-kind: ConfigMap
-apiVersion: v1
-metadata:
-  name: cloudwatch-exporter-config
-data:
-  config.yml: |
-    tasks:
-      - name: rds
-        default_region: ap-southeast-2
-        metrics:
-        - aws_namespace: "AWS/RDS"
-          aws_dimensions: [DBInstanceIdentifier]
-          aws_metric_name: FreeStorageSpace
-          aws_statistics: [Average]
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
@@ -64,7 +44,7 @@ spec:
     - alert: AwsRdsFreeStorageSpaceLow
       annotations:
         summary: RDS database low space
-        message: AWS RDS instance {{\`{{ \$labels.db_instance_identifier }}\`}} FreeStorageSpace is less than 1GB.
+        message: AWS RDS instance {{\`{{ \$labels.dbinstance_identifier }}\`}} FreeStorageSpace is less than 1GB.
       expr: |
         aws_rds_free_storage_space_average offset 10m < 1073741824
       for: 10m
@@ -73,7 +53,7 @@ spec:
     - alert: AwsRdsFreeStorageSpaceCritical
       annotations:
         summary: RDS database very low space
-        message: AWS RDS instance {{\`{{ \$labels.db_instance_identifier }}\`}} FreeStorageSpace is less than 100MB.
+        message: AWS RDS instance {{\`{{ \$labels.dbinstance_identifier }}\`}} FreeStorageSpace is less than 100MB.
       expr: |
         aws_rds_free_storage_space_average offset 10m < 104857600
       for: 10m
@@ -82,7 +62,7 @@ spec:
     - alert: AwsRdsFreeStorageSpaceWillFillIn4Hours
       annotations:
         summary: RDS database out of space soon
-        message: AWS RDS instance {{\`{{ \$labels.db_instance_identifier }}\`}} will run out of free space in 4 hours.
+        message: AWS RDS instance {{\`{{ \$labels.dbinstance_identifier }}\`}} will run out of free space in 4 hours.
       expr: |
         predict_linear(aws_rds_free_storage_space_average[6h] offset 10m, 4 * 3600) < 0
       for: 10m
@@ -92,7 +72,7 @@ EOF
 
 cat deployment.yaml
 
-echo $KUBECONFIG > k
+echo $KUBECONFIG_JSON > k
 export KUBECONFIG=k
 
 kubectl apply --record -f - < deployment.yaml

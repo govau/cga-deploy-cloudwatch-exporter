@@ -48,7 +48,7 @@ cur_cluster="$(kubectl config view -o=jsonpath="{.contexts[?(@.name==\"${cur_con
 cur_api_server="$(kubectl config view -o=jsonpath="{.clusters[?(@.name==\"${cur_cluster}\")].cluster.server}" --flatten=true)"
 cur_crt="$(kubectl config view -o=jsonpath="{.clusters[?(@.name==\"${cur_cluster}\")].cluster.certificate-authority-data}" --flatten=true)"
 
-kubeconfig="$(cat <<EOF
+kubeconfig_json="$(cat <<EOF
 {
   "apiVersion": "v1",
   "clusters": [
@@ -84,13 +84,15 @@ kubeconfig="$(cat <<EOF
 EOF
 )"
 
-echo "You may wish to run the following..."
-echo 'credhub set -n /concourse/apps/cloudwatch-exporter/kubeconfig -t value -v "$(cat <<EOKUBECONFIG'
-echo "${kubeconfig}"
-echo 'EOKUBECONFIG'
-echo ')"'
-echo
+echo "Ensuring you are logged in to credhub"
+if ! https_proxy=socks5://localhost:8112 credhub find > /dev/null; then
+  https_proxy=socks5://localhost:8112 credhub login --sso
+fi
+
+https_proxy=socks5://localhost:8112 \
+credhub set -n "/concourse/apps/cloudwatch-exporter/kubeconfig_json" -t value -v "${kubeconfig_json}"
+
 echo "Use in concourse:"
-echo "echo \$KUBECONFIG > k"
+echo "echo \$KUBECONFIG_JSON > k"
 echo "export KUBECONFIG=k"
 echo "kubectl get all"

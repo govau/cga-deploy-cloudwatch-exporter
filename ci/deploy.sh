@@ -3,66 +3,26 @@
 set -eu
 set -o pipefail
 
-: "${ENV:?Need to set ENV e.g. d}"
+: "${ENV_NAME:?Need to set ENV_NAME e.g. d}"
+: "${KUBECONFIG_JSON:?Need to set KUBECONFIG_JSON}"
 
-# Tag is not always populated correctly by the docker-image resource (ie it defaults to latest)
-# so use the actual source for tag
-TAG=$(cat src/.git/ref)
-REPO=$(cat img/repository)
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-cat <<EOF > deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: ${ENV}cld-cloudwatch-exporter
-spec:
-  selector:
-    matchLabels:
-      app: ${ENV}cld-cloudwatch-exporter
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: ${ENV}cld-cloudwatch-exporter
-    spec:
-      containers:
-      - name: ${ENV}cld-cloudwatch-exporter
-        image: ${REPO}:${TAG}
-        resources:
-          limits:
-            cpu: "200m"
-            memory: "64Mi"
-        envFrom:
-        - secretRef: {name: ${ENV}cld-cloudwatch-exporter}
-        ports:
-        - name: http
-          containerPort: 9042
-        volumeMounts:
-        - mountPath: /etc/cloudwatch_exporter
-          name: config-volume
-      volumes:
-      - name: config-volume
-        configMap:
-          name: cloudwatch-exporter-config
----
-kind: Service
-apiVersion: v1
-metadata:
-  name: ${ENV}cld-cloudwatch-exporter
-  labels:
-    monitor: me
-spec:
-  selector:
-    app: ${ENV}cld-cloudwatch-exporter
-  ports:
-  - name: web
-    port: 9042
-EOF
+echo $KUBECONFIG_JSON > secret-kubeconfig
+export KUBECONFIG=secret-kubeconfig
 
-cat deployment.yaml
+kubectl get po # just a test
 
-echo $KUBECONFIG > k
-export KUBECONFIG=k
+# Starting tiller in the background"
+export HELM_HOST=:44134
+TILLER_NAMESPACE=cloudwatch-exporter tiller --storage=secret --listen "$HELM_HOST" >/dev/null 2>&1 &
+helm init --client-only --wait
 
-kubectl apply --record -f - < deployment.yaml
-kubectl rollout status deployment.apps/${ENV}cld-cloudwatch-exporter
+# helm dependency update charts/stable/prometheus-cloudwatch-exporter/
+
+helm upgrade --install --wait \
+  --namespace cloudwatch-exporter \
+  -f <($SCRIPT_DIR/../gen-values.sh) \
+  ${ENV_NAME}cld charts/stable/prometheus-cloudwatch-exporter/
+
+# kubectl rollout status deployment.apps/${ENV_NAME}cld-cloudwatch-exporter

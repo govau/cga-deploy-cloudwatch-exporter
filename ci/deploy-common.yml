@@ -9,6 +9,6 @@ inputs:
 - name: deploy-src
 outputs: []
 params:
-  KUBECONFIG:
+  KUBECONFIG_JSON:
 run:
   path: deploy-src/ci/deploy-common.sh

@@ -1,20 +1,16 @@
 ---
 platform: linux
-
 image_resource:
   type: docker-image
   source:
     repository: govau/cga-cf-bosh-cli
     tag: latest
-
 inputs:
-- name: charts
 - name: deploy-src
-outputs: []
 
 params:
   ENV_NAME:
   KUBECONFIG_JSON:
 
 run:
-  path: deploy-src/ci/deploy.sh
+  path: deploy-src/ci/smoke-test.sh
