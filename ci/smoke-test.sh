@@ -13,16 +13,7 @@ export NAMESPACE="cloudwatch-exporter"
 
 kubectl -n ${NAMESPACE} get pods
 
-# Get pods that aren't running
-# '--field-selector=status.phase=Running' confusingly includes pods that are crashed and stopped, so has to be combined
-# with some jq
-badpods="$(kubectl -n ${NAMESPACE}  get pods  --field-selector=status.phase='Running' -o json | jq '.items[] | select(.status.containerStatuses[].ready!=true)')"
-if [[ $badpods ]]; then
-  echo "There are bad pods"
-  exit 1
-fi
-
-# TODO Try to connect to the pod port
+# Try to connect to the pod port
 POD_NAME=$(kubectl -n ${NAMESPACE} get pods -l app=prometheus-cloudwatch-exporter,release=${ENV_NAME}cld -o jsonpath="{.items[0].metadata.name}")
 kubectl -n ${NAMESPACE} port-forward $POD_NAME 9106:9106 &
 

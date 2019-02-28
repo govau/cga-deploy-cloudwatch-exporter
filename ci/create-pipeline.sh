@@ -19,6 +19,6 @@ for RESOURCE in $RESOURCES; do
   fly -t ${TARGET} check-resource --resource "${PIPELINE}/${RESOURCE}"
 done
 
-fly -t mcld trigger-job -j $PIPELINE/deploy-g
+fly -t mcld trigger-job -j $PIPELINE/deploy-ci
 
 unset https_proxy
