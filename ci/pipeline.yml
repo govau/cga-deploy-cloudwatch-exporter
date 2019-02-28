@@ -12,15 +12,15 @@ resources:
   source:
     branch: master
     uri: https://github.com/govau/cga-deploy-cloudwatch-exporter
-# - name: slack
-#   type: slack-notification
-#   source:
-#     url: ((slack-webhook-url))
-# resource_types:
-# - name: slack-notification
-#   type: docker-image
-#   source:
-#     repository: cfcommunity/slack-notification-resource
+- name: slack
+  type: slack-notification
+  source:
+    url: ((slack-webhook-url))
+resource_types:
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
 jobs:
 - name: deploy-common
   serial: true
@@ -32,8 +32,9 @@ jobs:
       file: deploy-src/ci/deploy-common.yml
       params:
         KUBECONFIG_JSON: ((kubeconfig_json))
-- name: deploy-g
-  serial: true
+- name: deploy-ci
+  serial_groups:
+  - ci
   plan:
   - do:
     - get: charts
@@ -48,23 +49,54 @@ jobs:
       params:
         ENV_NAME: g
         KUBECONFIG_JSON: ((kubeconfig_json))
-    # on_failure:
-    #   put: slack
-    #   params:
-    #     text: |
-    #       :x: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME FAILED
-    #       <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+  on_failure:
+    put: slack
+    params:
+      text: |
+        :x: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME FAILED
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+  on_success:
+    put: slack
+    params:
+      text: |
+        :white_check_mark: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME SUCCESS
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+- name: delete-ci
+  serial_groups:
+  - ci
+  plan:
+  - do:
+    - get: charts
+      passed:
+      - deploy-ci
+      trigger: true
+    - get: deploy-src
+      passed:
+      - deploy-ci
+      trigger: true
+    - task: delete
+      file: deploy-src/ci/delete.yml
+      params:
+        ENV_NAME: g
+        KUBECONFIG_JSON: ((kubeconfig_json))
+  # on_failure:
+  #   put: slack
+  #   params:
+  #     text: |
+  #       :x: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME FAILED
+  #       <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+
 - name: deploy-d
   serial: true
   plan:
   - do:
     - get: charts
       passed:
-        - deploy-g
+        - deploy-ci
       trigger: true
     - get: deploy-src
       passed:
-        - deploy-g
+        - deploy-ci
       trigger: true
     - task: deploy
       file: deploy-src/ci/deploy.yml
@@ -76,23 +108,23 @@ jobs:
       params:
         ENV_NAME: d
         KUBECONFIG_JSON: ((kubeconfig_json))
-    # on_failure:
-    #   put: slack
-    #   params:
-    #     text: |
-    #       :x: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME FAILED
-    #       <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+  on_failure:
+    put: slack
+    params:
+      text: |
+        :x: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME FAILED
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
 - name: deploy-y
   serial: true
   plan:
   - do:
     - get: charts
       passed:
-        - deploy-g
+        - deploy-ci
       trigger: true
     - get: deploy-src
       passed:
-        - deploy-g
+        - deploy-ci
       trigger: true
     - task: deploy
       file: deploy-src/ci/deploy.yml
@@ -104,23 +136,23 @@ jobs:
       params:
         ENV_NAME: "y"
         KUBECONFIG_JSON: ((kubeconfig_json))
-    # on_failure:
-    #   put: slack
-    #   params:
-    #     text: |
-    #       :x: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME FAILED
-    #       <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+  on_failure:
+    put: slack
+    params:
+      text: |
+        :x: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME FAILED
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
 - name: deploy-b
   serial: true
   plan:
   - do:
     - get: charts
       passed:
-        - deploy-g
+        - deploy-ci
       trigger: true
     - get: deploy-src
       passed:
-        - deploy-g
+        - deploy-ci
       trigger: true
     - task: deploy
       file: deploy-src/ci/deploy.yml
@@ -132,10 +164,9 @@ jobs:
       params:
         ENV_NAME: b
         KUBECONFIG_JSON: ((kubeconfig_json))
-    # on_failure:
-    #   put: slack
-    #   params:
-    #     text: |
-    #       :x: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME FAILED
-    #       <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-
+  on_failure:
+    put: slack
+    params:
+      text: |
+        :x: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME FAILED
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
