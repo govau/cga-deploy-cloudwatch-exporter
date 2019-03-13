@@ -85,7 +85,6 @@ jobs:
       text: |
         :x: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME FAILED
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-
 - name: deploy-d
   serial: true
   plan:
@@ -163,6 +162,34 @@ jobs:
       file: deploy-src/ci/smoke-test.yml
       params:
         ENV_NAME: b
+        KUBECONFIG_JSON: ((kubeconfig_json))
+  on_failure:
+    put: slack
+    params:
+      text: |
+        :x: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME FAILED
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+- name: deploy-t
+  serial: true
+  plan:
+  - do:
+    - get: charts
+      passed:
+        - deploy-ci
+      trigger: true
+    - get: deploy-src
+      passed:
+        - deploy-ci
+      trigger: true
+    - task: deploy
+      file: deploy-src/ci/deploy.yml
+      params:
+        ENV_NAME: t
+        KUBECONFIG_JSON: ((kubeconfig_json))
+    - task: smoke-test
+      file: deploy-src/ci/smoke-test.yml
+      params:
+        ENV_NAME: t
         KUBECONFIG_JSON: ((kubeconfig_json))
   on_failure:
     put: slack

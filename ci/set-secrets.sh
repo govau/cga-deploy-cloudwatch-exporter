@@ -14,26 +14,8 @@ function trim_to_one_access_key(){
     fi
 }
 
-# TODO delete - not used anymore
-# set the iam user creds used to access ECR
-# iam_user=cloudwatch-exporter-ecr-pusher
-# export AWS_PROFILE=l-cld
-# trim_to_one_access_key $iam_user
-# output="$(aws iam create-access-key --user-name cloudwatch-exporter-ecr-pusher)"
-# aws_access_key_id="$(echo $output | jq -r .AccessKey.AccessKeyId)"
-# aws_secret_access_key="$(echo $output | jq -r .AccessKey.SecretAccessKey)"
-# unset AWS_PROFILE
-# aws_repository="$(aws --profile l-cld ecr describe-repositories | jq -r '.repositories[] | select( .repositoryName == "cloudwatch-exporter") | .repositoryUri')"
-
-# export https_proxy=socks5://localhost:8112
-# credhub s -n /concourse/apps/cloudwatch-exporter/aws_access_key_id --type value --value "${aws_access_key_id}"
-# credhub s -n /concourse/apps/cloudwatch-exporter/aws_secret_access_key --type value --value "${aws_secret_access_key}"
-# credhub s -n /concourse/apps/cloudwatch-exporter/aws_repository --type value --value "${aws_repository}"
-
-# unset https_proxy
-
 # set the k8s secrets used to access cloudwatch-exporter in each env
-for ENV_NAME in g d y b; do
+for ENV_NAME in b d g t y; do
     iam_user="cloudwatch_exporter"
     export AWS_PROFILE=${ENV_NAME}-cld
 
