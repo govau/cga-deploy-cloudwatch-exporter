@@ -18,12 +18,17 @@ service:
     monitor: me
 config: |-
   region: ap-southeast-2
-  period_seconds: 240
   metrics:
   - aws_namespace: "AWS/RDS"
     aws_dimensions: [DBInstanceIdentifier]
     aws_metric_name: FreeStorageSpace
     aws_statistics: [Average]
+    period_seconds: 240
+  - aws_namespace: "AWS/ES"
+    aws_dimensions: [ClientId,DomainName]
+    aws_metric_name: FreeStorageSpace
+    aws_statistics: [Average]
+
   # todo add more
   # - aws_namespace: AWS/S3
   #   aws_metric_name: BucketSizeBytes
