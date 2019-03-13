@@ -206,6 +206,7 @@ jobs:
       passed:
         - deploy-b
         - deploy-d
+        - deploy-t
         - deploy-y
   on_success:
     put: slack
