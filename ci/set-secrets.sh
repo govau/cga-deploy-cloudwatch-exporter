@@ -14,6 +14,13 @@ function trim_to_one_access_key(){
     fi
 }
 
+NAMESPACE=cloudwatch-exporter
+
+if [[ $(kubectl get namespace ${NAMESPACE} 2>/dev/null) == "" ]]; then
+  echo "Namespace not found - have you targetted the right cluster and run k8s-bootstrap.sh?"
+  exit 1
+fi
+
 # set the k8s secrets used to access cloudwatch-exporter in each env
 for ENV_NAME in b d g t y; do
     iam_user="cloudwatch_exporter"
@@ -27,7 +34,7 @@ for ENV_NAME in b d g t y; do
 
     unset AWS_PROFILE
 
-    kubectl -n cloudwatch-exporter create secret generic ${ENV_NAME}cld-aws \
+    kubectl -n ${NAMESPACE} create secret generic ${ENV_NAME}cld-aws \
         --from-literal "access_key=${aws_access_key_id}" \
         --from-literal "secret_key=${aws_secret_access_key}" \
         --dry-run -o yaml | kubectl apply -f -
