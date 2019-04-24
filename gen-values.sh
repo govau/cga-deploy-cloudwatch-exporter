@@ -28,6 +28,10 @@ config: |-
     aws_dimensions: [ClientId,DomainName]
     aws_metric_name: FreeStorageSpace
     aws_statistics: [Average]
+  - aws_namespace: "AWS/Kinesis"
+    aws_dimensions: [StreamName]
+    aws_metric_name: GetRecords.IteratorAgeMilliseconds
+    aws_statistics: [Average]
 
   # todo add more
   # - aws_namespace: AWS/S3
