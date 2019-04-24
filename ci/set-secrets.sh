@@ -22,7 +22,7 @@ if [[ $(kubectl get namespace ${NAMESPACE} 2>/dev/null) == "" ]]; then
 fi
 
 # set the k8s secrets used to access cloudwatch-exporter in each env
-for ENV_NAME in b d g t y; do
+for ENV_NAME in b d g l t y; do
     iam_user="cloudwatch_exporter"
     export AWS_PROFILE=${ENV_NAME}-cld
 
