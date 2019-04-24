@@ -73,9 +73,9 @@ spec:
     - alert: AwsKinesisGetRecordsIteratorAgeHigh
       annotations:
         summary: Kinesis GetRecords Iterator age is high
-        message: AWS Kinesis stream {{\`{{ \$labels.stream_name }}\`}} GetRecords.IteratorAgeMilliseconds is greater than 1000.
+        message: AWS Kinesis stream {{\`{{ \$labels.stream_name }}\`}} GetRecords.IteratorAgeMilliseconds is greater than 1 minute.
       expr: |
-        aws_kinesis_get_records_iterator_age_milliseconds_average > 1000
+        aws_kinesis_get_records_iterator_age_milliseconds_average > 60000
       labels:
         severity: warning
 EOF
