@@ -4,9 +4,9 @@ resources:
   type: git
   source:
     branch: master
-    uri: https://github.com/helm/charts
     paths:
     - stable/prometheus-cloudwatch-exporter/**
+    uri: https://github.com/helm/charts
 - name: deploy-src
   type: git
   source:
@@ -91,11 +91,11 @@ jobs:
   - do:
     - get: charts
       passed:
-        - deploy-ci
+      - deploy-ci
       trigger: true
     - get: deploy-src
       passed:
-        - deploy-ci
+      - deploy-ci
       trigger: true
     - task: deploy
       file: deploy-src/ci/deploy.yml
@@ -119,11 +119,11 @@ jobs:
   - do:
     - get: charts
       passed:
-        - deploy-ci
+      - deploy-ci
       trigger: true
     - get: deploy-src
       passed:
-        - deploy-ci
+      - deploy-ci
       trigger: true
     - task: deploy
       file: deploy-src/ci/deploy.yml
@@ -147,11 +147,11 @@ jobs:
   - do:
     - get: charts
       passed:
-        - deploy-ci
+      - deploy-ci
       trigger: true
     - get: deploy-src
       passed:
-        - deploy-ci
+      - deploy-ci
       trigger: true
     - task: deploy
       file: deploy-src/ci/deploy.yml
@@ -175,11 +175,11 @@ jobs:
   - do:
     - get: charts
       passed:
-        - deploy-ci
+      - deploy-ci
       trigger: true
     - get: deploy-src
       passed:
-        - deploy-ci
+      - deploy-ci
       trigger: true
     - task: deploy
       file: deploy-src/ci/deploy.yml
@@ -202,16 +202,15 @@ jobs:
   plan:
   - do:
     - get: charts
-      trigger: true
       passed:
-        - deploy-b
-        - deploy-d
-        - deploy-t
-        - deploy-y
+      - deploy-b
+      - deploy-d
+      - deploy-t
+      - deploy-y
+      trigger: true
   on_success:
     put: slack
     params:
       text: |
         :white_check_mark: $BUILD_PIPELINE_NAME deploy-prod SUCCESS
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-
